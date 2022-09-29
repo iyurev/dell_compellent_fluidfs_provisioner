@@ -1,0 +1,20 @@
+- name: Create work namespace and  cluster role + role binding
+  k8s:
+    state: present
+    definition: "{{ item }}"
+  loop: "{{ lookup( 'template', 'cluster-prepare.yaml' ) | from_yaml_all | list }}"
+
+- name: Create storage ( DSM username/password ) credentials secret
+  k8s:
+    state: present
+    definition: "{{ lookup( 'template', 'dms_rest_cred_secret.yaml' ) | from_yaml }}"
+
+- name: Create image pull secret
+  k8s:
+    state: present
+    definition: "{{ lookup( 'template', 'image_pull_secret.yaml' ) | from_yaml }}"
+
+- name: Create deployment
+  k8s:
+    state: present
+    definition: "{{ lookup( 'template', 'deployment.yaml' ) | from_yaml }}"

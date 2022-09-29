@@ -1,0 +1,8 @@
+#Must be defined:
+#dsm_username , dsm_password - ( clear string ) ,  image_pull_secret - as base64 single line
+- name: Install FluidFS storage provisioner
+  hosts: localhost
+  become: no
+  tasks:
+    - include_role:
+               name: install_fluidfs_provisioner

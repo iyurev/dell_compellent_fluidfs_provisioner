@@ -1,0 +1,60 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: {{ namespace_name }}
+  name: {{ deployment_name }}
+  labels:
+      name: {{ deployment_name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+         deployment: {{ deployment_name }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        deployment: {{ deployment_name }}
+    spec:
+      containers:
+        - name: provisioner
+          image:  "{{ image_name }}:{{ image_tag }}"
+          imagePullPolicy: Always
+          command:
+              - "sh"
+              - "-c"
+              - "/bin/fluidfs_provisioner 2>&1"
+          securityContext:
+              privileged: true
+              runAsUser: 0
+
+          env:
+            - name: BASE_URL
+              value: "{{ dsm_hostname }}"
+
+            - name: CLUSTER_NAME
+              value: "{{ fluidfs_cluster_name }}"
+
+            - name: USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ dsm_credentials_secretname }}
+                  key: username
+
+            - name: PASSWORD
+              valueFrom:
+                  secretKeyRef:
+                    name: {{ dsm_credentials_secretname }}
+                    key: password
+      tolerations:
+          - key: node-role.kubernetes.io/master
+            effect: NoSchedule
+
+      imagePullSecrets:
+           - name: {{ image_pull_secretname }}
+
+
+
+
